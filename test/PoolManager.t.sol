@@ -665,7 +665,7 @@ contract PoolManagerTest is Test, Deployers, GasSnapshot {
         testSettings = PoolSwapTest.TestSettings({takeClaims: false, settleUsingBurn: false});
 
         // swapRouter.swap(key, swapParams, testSettings, ZERO_BYTES);
-        manager.unlock();
+        // manager.unlock();
         manager.swap(key, swapParams, ZERO_BYTES);
         snapLastCall("poolmgr swap with hooks");
     }
