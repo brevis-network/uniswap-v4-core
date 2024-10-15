@@ -24,6 +24,7 @@ import {GasSnapshot} from "forge-gas-snapshot/GasSnapshot.sol";
 import {PoolEmptyUnlockTest} from "../src/test/PoolEmptyUnlockTest.sol";
 import {Action} from "../src/test/PoolNestedActionsTest.sol";
 import {PoolId} from "../src/types/PoolId.sol";
+import {Lock} from "../src/libraries/Lock.sol";
 import {LPFeeLibrary} from "../src/libraries/LPFeeLibrary.sol";
 import {Position} from "../src/libraries/Position.sol";
 import {Constants} from "./utils/Constants.sol";
@@ -643,6 +644,30 @@ contract PoolManagerTest is Test, Deployers, GasSnapshot {
 
         swapRouter.swap(key, swapParams, testSettings, ZERO_BYTES);
         snapLastCall("swap with hooks");
+    }
+
+    function test_poolmgr_swap_withHooks_gas() public {
+        address allHooksAddr = Constants.ALL_HOOKS;
+
+        MockHooks impl = new MockHooks();
+        vm.etch(allHooksAddr, address(impl).code);
+        MockHooks mockHooks = MockHooks(allHooksAddr);
+
+        (key,) = initPoolAndAddLiquidity(currency0, currency1, mockHooks, 3000, SQRT_PRICE_1_1);
+
+        PoolSwapTest.TestSettings memory testSettings =
+            PoolSwapTest.TestSettings({takeClaims: false, settleUsingBurn: false});
+
+        swapRouter.swap(key, SWAP_PARAMS, testSettings, ZERO_BYTES);
+
+        IPoolManager.SwapParams memory swapParams =
+            IPoolManager.SwapParams({zeroForOne: true, amountSpecified: -100, sqrtPriceLimitX96: SQRT_PRICE_1_4});
+        testSettings = PoolSwapTest.TestSettings({takeClaims: false, settleUsingBurn: false});
+
+        // swapRouter.swap(key, swapParams, testSettings, ZERO_BYTES);
+        manager.unlock();
+        manager.swap(key, swapParams, ZERO_BYTES);
+        snapLastCall("poolmgr swap with hooks");
     }
 
     function test_swap_mint6909IfOutputNotTaken_gas() public {

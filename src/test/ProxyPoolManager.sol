@@ -53,7 +53,9 @@ contract ProxyPoolManager is IPoolManager, ProtocolFees, NoDelegateCall, ERC6909
         if (!Lock.isUnlocked()) ManagerLocked.selector.revertWith();
         _;
     }
-
+    function unlock() external {
+        Lock.unlock();
+    }
     /// @inheritdoc IPoolManager
     function unlock(bytes calldata data) external noDelegateCall returns (bytes memory result) {
         if (Lock.isUnlocked()) AlreadyUnlocked.selector.revertWith();
