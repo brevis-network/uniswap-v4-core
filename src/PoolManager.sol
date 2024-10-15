@@ -98,6 +98,11 @@ contract PoolManager is IPoolManager, ProtocolFees, NoDelegateCall, ERC6909Claim
         _;
     }
 
+    modifier onlyWhenUnlocked2() {
+        if (!Lock.isUnlocked())
+        _;
+    }
+
     function unlock() external {
         Lock.unlock();
     }
@@ -186,7 +191,7 @@ contract PoolManager is IPoolManager, ProtocolFees, NoDelegateCall, ERC6909Claim
     /// @inheritdoc IPoolManager
     function swap(PoolKey memory key, IPoolManager.SwapParams memory params, bytes calldata hookData)
         external
-        onlyWhenUnlocked
+        onlyWhenUnlocked2
         noDelegateCall
         returns (BalanceDelta swapDelta)
     {
