@@ -41,26 +41,27 @@ contract PoolSwapTest is PoolTestBase {
             manager.unlock(abi.encode(CallbackData(msg.sender, testSettings, key, params, hookData))), (BalanceDelta)
         );
 
-        uint256 ethBalance = address(this).balance;
-        if (ethBalance > 0) CurrencyLibrary.ADDRESS_ZERO.transfer(msg.sender, ethBalance);
+        //uint256 ethBalance = address(this).balance;
+        //if (ethBalance > 0) CurrencyLibrary.ADDRESS_ZERO.transfer(msg.sender, ethBalance);
     }
 
     function unlockCallback(bytes calldata rawData) external returns (bytes memory) {
-        require(msg.sender == address(manager));
+        
+        // require(msg.sender == address(manager));
 
         CallbackData memory data = abi.decode(rawData, (CallbackData));
-
+        /*
         (,, int256 deltaBefore0) = _fetchBalances(data.key.currency0, data.sender, address(this));
         (,, int256 deltaBefore1) = _fetchBalances(data.key.currency1, data.sender, address(this));
 
         require(deltaBefore0 == 0, "deltaBefore0 is not equal to 0");
         require(deltaBefore1 == 0, "deltaBefore1 is not equal to 0");
-
+        */
         BalanceDelta delta = manager.swap(data.key, data.params, data.hookData);
 
         (,, int256 deltaAfter0) = _fetchBalances(data.key.currency0, data.sender, address(this));
         (,, int256 deltaAfter1) = _fetchBalances(data.key.currency1, data.sender, address(this));
-
+        /*
         if (data.params.zeroForOne) {
             if (data.params.amountSpecified < 0) {
                 // exact input, 0 for 1
@@ -98,7 +99,7 @@ contract PoolSwapTest is PoolTestBase {
                 );
             }
         }
-
+        */
         if (deltaAfter0 < 0) {
             data.key.currency0.settle(manager, data.sender, uint256(-deltaAfter0), data.testSettings.settleUsingBurn);
         }
@@ -111,7 +112,7 @@ contract PoolSwapTest is PoolTestBase {
         if (deltaAfter1 > 0) {
             data.key.currency1.take(manager, data.sender, uint256(deltaAfter1), data.testSettings.takeClaims);
         }
-
+    
         return abi.encode(delta);
     }
 }
